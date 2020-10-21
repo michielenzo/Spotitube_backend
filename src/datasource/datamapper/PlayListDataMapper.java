@@ -1,7 +1,7 @@
 package datasource.datamapper;
 
 import datasource.IDatabaseConnector;
-import datasource.MySQLConnector;
+import datasource.DatabaseConnector;
 import domain.objects.*;
 
 import javax.inject.Inject;
@@ -20,7 +20,7 @@ public class PlayListDataMapper {
     private OwnerDataMapper ownerDataMapper;
 
     @Inject
-    public PlayListDataMapper(OwnerDataMapper ownerDataMapper, TrackDataMapper trackDataMapper, MySQLConnector mySQLConnector){
+    public PlayListDataMapper(OwnerDataMapper ownerDataMapper, TrackDataMapper trackDataMapper, DatabaseConnector mySQLConnector){
         this.databaseConnector = mySQLConnector;
         this.trackDataMapper = trackDataMapper;
         this.ownerDataMapper = ownerDataMapper;

@@ -26,7 +26,7 @@ public class PlaylistDataMapperTest {
     private PlayListDataMapper playListDataMapper;
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();
-    @Mock private MySQLConnector databaseConnectorMock;
+    @Mock private DatabaseConnector databaseConnectorMock;
     @Mock private Connection connectionMock;
     @Mock private Statement statementMock;
     @Mock private ResultSet resultSetMock;
@@ -47,7 +47,7 @@ public class PlaylistDataMapperTest {
 
             playListDataMapper.create("a", "b");
 
-            verify(statementMock).execute("insert into playlist values ('a','b')");
+            verify(statementMock).execute("insert into playlist (name, username) values ('a','b')");
         } catch (SQLException e) {
             e.printStackTrace();
         }

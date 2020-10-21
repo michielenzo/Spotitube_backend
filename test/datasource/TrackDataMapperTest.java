@@ -25,7 +25,7 @@ public class TrackDataMapperTest {
     private TrackDataMapper trackDataMapper;
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();
-    @Mock private MySQLConnector databaseConnectorMock;
+    @Mock private DatabaseConnector databaseConnectorMock;
     @Mock private Connection connectionMock;
     @Mock private Statement statementMock;
     @Mock private ResultSet resultSetMock;
