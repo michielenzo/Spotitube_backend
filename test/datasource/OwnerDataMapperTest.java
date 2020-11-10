@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,10 @@ public class OwnerDataMapperTest {
     @Mock private Statement statementMock;
     @Mock private ResultSet resultSetMock;
 
+    private static final String USERNAME = "user123";
+    private static final String PASSWORD = "password";
+    private static final String TOKEN = "1234-1234-1234";
+
     @Before
     public void initialize(){
         ownerDataMapper = new OwnerDataMapper(databaseConnectorMock);
@@ -38,17 +43,17 @@ public class OwnerDataMapperTest {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
             when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
-            when(statementMock.executeQuery("select * from owner where username = 'user1'")).thenReturn(resultSetMock);
+            when(statementMock.executeQuery("select * from owner where username = 'user123'")).thenReturn(resultSetMock);
             when(resultSetMock.next()).thenReturn(true);
-            when(resultSetMock.getString("username")).thenReturn("user1");
-            when(resultSetMock.getString("password")).thenReturn("abcdefg");
-            when(resultSetMock.getString("token")).thenReturn("1234-1234-1234");
+            when(resultSetMock.getString("username")).thenReturn(USERNAME);
+            when(resultSetMock.getString("password")).thenReturn(PASSWORD);
+            when(resultSetMock.getString("token")).thenReturn(TOKEN);
 
-            Owner owner = ownerDataMapper.read("user1");
+            Owner owner = ownerDataMapper.read(USERNAME);
 
-            assertEquals("abcdefg" ,owner.getPassword());
-            assertEquals("user1" ,owner.getUsername());
-            assertEquals("1234-1234-1234" ,owner.getToken());
+            assertEquals(PASSWORD ,owner.getPassword());
+            assertEquals(USERNAME ,owner.getUsername());
+            assertEquals(TOKEN ,owner.getToken());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -61,16 +66,32 @@ public class OwnerDataMapperTest {
             when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
             when(statementMock.executeQuery("select * from owner where token = '1234-1234-1234'")).thenReturn(resultSetMock);
             when(resultSetMock.next()).thenReturn(true);
-            when(resultSetMock.getString("username")).thenReturn("user1");
-            when(resultSetMock.getString("password")).thenReturn("abcdefg");
+            when(resultSetMock.getString("username")).thenReturn(USERNAME);
+            when(resultSetMock.getString("password")).thenReturn(PASSWORD);
 
-            Owner owner = ownerDataMapper.readByToken("1234-1234-1234");
+            Owner owner = ownerDataMapper.readByToken(TOKEN);
 
-            assertEquals("abcdefg", owner.getPassword());
-            assertEquals("user1", owner.getUsername());
-            assertEquals("1234-1234-1234", owner.getToken());
+            assertEquals(PASSWORD, owner.getPassword());
+            assertEquals(USERNAME, owner.getUsername());
+            assertEquals(TOKEN, owner.getToken());
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void test_readByToken_method_returnsNullWhenOwnerDOesNotExist(){
+        try{
+            when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
+            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(statementMock.executeQuery("select * from owner where token = '1234-1234-1234'")).thenReturn(resultSetMock);
+            when(resultSetMock.next()).thenReturn(false);
+
+            Owner owner = ownerDataMapper.readByToken(TOKEN);
+
+            assertNull(owner);
+        } catch (SQLException ex){
+            ex.printStackTrace();
         }
     }
 
@@ -80,9 +101,9 @@ public class OwnerDataMapperTest {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
             when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
 
-            ownerDataMapper.update("a","b","c");
+            ownerDataMapper.update(USERNAME, PASSWORD,TOKEN);
 
-            verify(statementMock).execute("update owner set username = 'a', password = 'b' , token = 'c' where username = 'a'");
+            verify(statementMock).execute("update owner set username = 'user123', password = 'password' , token = '1234-1234-1234' where username = 'user123'");
         } catch (SQLException e) {
             e.printStackTrace();
         }

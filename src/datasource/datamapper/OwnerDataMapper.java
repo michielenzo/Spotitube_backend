@@ -17,16 +17,6 @@ public class OwnerDataMapper {
         this.databaseConnector = databaseConnector;
     }
 
-    public void create(String userName, String password){
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("insert into owner values ('%s','%s')",userName ,password);
-            stmt.execute(query);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public Owner read(String username){
         Owner owner = new Owner();
         try {
@@ -55,16 +45,6 @@ public class OwnerDataMapper {
                     password,
                     token,
                     username);
-            stmt.execute(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void delete(String username){
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("delete from owner where username = '%s'", username);
             stmt.execute(query);
         } catch (SQLException e) {
             e.printStackTrace();

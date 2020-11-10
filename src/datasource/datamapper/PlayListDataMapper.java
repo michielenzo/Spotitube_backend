@@ -36,27 +36,27 @@ public class PlayListDataMapper {
         }
     }
 
-    public PlayList read(int id){
-        PlayList playList = new PlayList();
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from playlist where playlistid = %s", id);
-            ResultSet resultSet = stmt.executeQuery(query);
-            resultSet.next();
-            playList.setId(resultSet.getInt("playlistid"));
-            playList.setName(resultSet.getString("name"));
-            playList.setOwner(ownerDataMapper.read(resultSet.getString("username")));
-            query = String.format("select trackid from trackinplaylist where playlistid = %s", id);
-            resultSet = stmt.executeQuery(query);
-            while(resultSet.next()){
-                Track track = trackDataMapper.read(resultSet.getInt("trackid"));
-                playList.getTrackList().add(track);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return playList;
-    }
+//    public PlayList read(int id){
+//        PlayList playList = new PlayList();
+//        try {
+//            Statement stmt = databaseConnector.getConnection().createStatement();
+//            String query = String.format("select * from playlist where playlistid = %s", id);
+//            ResultSet resultSet = stmt.executeQuery(query);
+//            resultSet.next();
+//            playList.setId(resultSet.getInt("playlistid"));
+//            playList.setName(resultSet.getString("name"));
+//            playList.setOwner(ownerDataMapper.read(resultSet.getString("username")));
+//            query = String.format("select trackid from trackinplaylist where playlistid = %s", id);
+//            resultSet = stmt.executeQuery(query);
+//            while(resultSet.next()){
+//                Track track = trackDataMapper.read(resultSet.getInt("trackid"));
+//                playList.getTrackList().add(track);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return playList;
+//    }
 
     public void update(PlayList playList){
         try {

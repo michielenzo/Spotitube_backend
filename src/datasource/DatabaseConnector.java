@@ -20,6 +20,7 @@ public class DatabaseConnector implements IDatabaseConnector{
             return DriverManager.getConnection(configReader.read("connection_string"));
         } catch (Exception ex) {
             System.out.println("[DB conn ERROR]: " + ex.getMessage());
+            ex.printStackTrace();
         }
         return null;
     }

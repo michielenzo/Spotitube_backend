@@ -31,6 +31,19 @@ public class PlaylistDataMapperTest {
     @Mock private Statement statementMock;
     @Mock private ResultSet resultSetMock;
 
+    private static final String ALBUM_NAME = "rock 'n roll";
+    private static final int TRACK_ID = 1;
+    private static final String PERFORMER = "Andre Hazes";
+    private static final String TITLE = "lied";
+    private static final int PLAYCOUNT = 235789;
+    private static final int DURATION = 435;
+    private static final boolean OFFLINE_AVAILABLE = true;
+    private static final int PLAYLIST_ID = 1;
+    private static final String USERNAME = "user123";
+    private static final String PASSWORD = "password";
+    private static final String TOKEN = "1234-1234-1234";
+    private static final String PLAYLIST_NAME = "l1";
+
     @Before
     public void initialize(){
         playListDataMapper = new PlayListDataMapper(
@@ -45,9 +58,9 @@ public class PlaylistDataMapperTest {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
             when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
 
-            playListDataMapper.create("a", "b");
+            playListDataMapper.create(PLAYLIST_NAME, USERNAME);
 
-            verify(statementMock).execute("insert into playlist (name, username) values ('a','b')");
+            verify(statementMock).execute("insert into playlist (name, username) values ('l1','user123')");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -75,12 +88,12 @@ public class PlaylistDataMapperTest {
             when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
 
             PlayList playList = new PlayList();
-            playList.setId(1);
-            playList.setName("a");
+            playList.setId(TRACK_ID);
+            playList.setName(PLAYLIST_NAME);
 
             playListDataMapper.update(playList);
 
-            verify(statementMock).execute("update playlist set name = 'a' where playlistid = 1");
+            verify(statementMock).execute("update playlist set name = 'l1' where playlistid = 1");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -112,25 +125,25 @@ public class PlaylistDataMapperTest {
 
             when(resultSetMock.next()).thenReturn(true).thenReturn(false);
 
-            when(resultSetMock.getInt("playlistid")).thenReturn(1);
-            when(resultSetMock.getString("username")).thenReturn("a");
-            when(resultSetMock.getString("password")).thenReturn("wachtwoord");
-            when(resultSetMock.getString("token")).thenReturn("1234-1234-1234");
-            when(resultSetMock.getString("album")).thenReturn("bloemetjes");
-            when(resultSetMock.getInt("trackid")).thenReturn(1);
-            when(resultSetMock.getString("performer")).thenReturn("Andre Hazes");
-            when(resultSetMock.getString("title")).thenReturn("boterbloem");
-            when(resultSetMock.getInt("playcount")).thenReturn(235789);
-            when(resultSetMock.getInt("duration")).thenReturn(435);
-            when(resultSetMock.getBoolean("offlineavailable")).thenReturn(true);
+            when(resultSetMock.getInt("playlistid")).thenReturn(PLAYLIST_ID);
+            when(resultSetMock.getString("username")).thenReturn(USERNAME);
+            when(resultSetMock.getString("password")).thenReturn(PASSWORD);
+            when(resultSetMock.getString("token")).thenReturn(TOKEN);
+            when(resultSetMock.getString("album")).thenReturn(ALBUM_NAME);
+            when(resultSetMock.getInt("trackid")).thenReturn(TRACK_ID);
+            when(resultSetMock.getString("performer")).thenReturn(PERFORMER);
+            when(resultSetMock.getString("title")).thenReturn(TITLE);
+            when(resultSetMock.getInt("playcount")).thenReturn(PLAYCOUNT);
+            when(resultSetMock.getInt("duration")).thenReturn(DURATION);
+            when(resultSetMock.getBoolean("offlineavailable")).thenReturn(OFFLINE_AVAILABLE);
 
             List<PlayList> playListList = playListDataMapper.readAll();
 
-            assertEquals("boterbloem", playListList.get(0).getTrackList().get(0).getTitle());
-            assertEquals(435, playListList.get(0).getTrackList().get(0).getDuration());
-            assertEquals("Andre Hazes", playListList.get(0).getTrackList().get(0).getPerformer());
-            assertEquals(235789 ,playListList.get(0).getTrackList().get(0).getPlayCount());
-            assertEquals(1 ,playListList.get(0).getTrackList().get(0).getId());
+            assertEquals(TITLE, playListList.get(0).getTrackList().get(0).getTitle());
+            assertEquals(DURATION, playListList.get(0).getTrackList().get(0).getDuration());
+            assertEquals(PERFORMER, playListList.get(0).getTrackList().get(0).getPerformer());
+            assertEquals(PLAYCOUNT ,playListList.get(0).getTrackList().get(0).getPlayCount());
+            assertEquals(TRACK_ID ,playListList.get(0).getTrackList().get(0).getId());
         } catch (SQLException e) {
             e.printStackTrace();
         }

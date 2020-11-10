@@ -21,34 +21,6 @@ public class TrackDataMapper {
         this.databaseConnector = databaseConnector;
     }
 
-    public void create(Track track){
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = null;
-            if(track instanceof Song){
-                query = String.format("INSERT INTO track VALUES ('%s','%s',%s,%s,'%s','%s','null','null')",
-                        track.getPerformer(),
-                        track.getTitle(),
-                        track.getPlayCount(),
-                        track.getDuration(),
-                        track.isOfflineAvailable(),
-                        ((Song) track).getAlbum());
-            }else if(track instanceof Video){
-                query = String.format("INSERT INTO track VALUES ('%s','%s',%s,%s,'%s','null','%s','%s')",
-                        track.getPerformer(),
-                        track.getTitle(),
-                        track.getPlayCount(),
-                        track.getDuration(),
-                        track.isOfflineAvailable(),
-                        ((Video) track).getPublicationDate(),
-                        ((Video) track).getDescription());
-            }
-            stmt.execute(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public Track read(int id){
         Track track = null;
         try {
@@ -85,16 +57,6 @@ public class TrackDataMapper {
                         ((Video)track).getDescription());
             }
             query += String.format(" where trackid = %s", track.getId());
-            stmt.execute(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void delete(int id){
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("DELETE FROM [Track] WHERE trackID = %s", id);
             stmt.execute(query);
         } catch (SQLException e) {
             e.printStackTrace();

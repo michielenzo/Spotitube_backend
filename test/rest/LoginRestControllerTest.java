@@ -23,23 +23,23 @@ public class LoginRestControllerTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
     @Mock private LoginService loginService;
 
-    @Test
-    public void test_loginAttempt_method(){
-
-        LoginRequest request = new LoginRequest();
-        request.setUser("user");
-        request.setPassword("password");
-
-        try {
-            Mockito.when(loginService.login(request)).thenReturn("1234");
-        } catch (InvalidPasswordException | InvalidUsernameException ex) {
-            Assert.fail();
-        }
-
-
-        System.out.println(Response.class);
-        Response response = loginRestController.loginAttempt(request);
-        //System.out.println(response.getStatus());
-        //Assert.assertEquals(Response.Status.OK, );
-    }
+//    @Test
+//    public void test_loginAttempt_method(){
+//
+//        LoginRequest request = new LoginRequest();
+//        request.setUser("user");
+//        request.setPassword("password");
+//
+//        try {
+//            Mockito.when(loginService.login(request)).thenReturn("1234");
+//        } catch (InvalidPasswordException | InvalidUsernameException ex) {
+//            Assert.fail();
+//        }
+//
+//
+//        System.out.println(Response.class);
+//        Response response = loginRestController.loginAttempt(request);
+//        //System.out.println(response.getStatus());
+//        //Assert.assertEquals(Response.Status.OK, );
+//    }
 }
