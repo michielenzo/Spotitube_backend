@@ -3,6 +3,7 @@ package datasource.datamapper;
 import datasource.IDatabaseConnector;
 import datasource.DatabaseConnector;
 import domain.objects.*;
+import service.IPlayListDataMapper;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -11,19 +12,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayListDataMapper {
+public class PlayListDataMapper implements IPlayListDataMapper {
 
     private IDatabaseConnector databaseConnector;
 
-    private TrackDataMapper trackDataMapper;
-
-    private OwnerDataMapper ownerDataMapper;
-
     @Inject
-    public PlayListDataMapper(OwnerDataMapper ownerDataMapper, TrackDataMapper trackDataMapper, DatabaseConnector mySQLConnector){
+    public PlayListDataMapper(DatabaseConnector mySQLConnector){
         this.databaseConnector = mySQLConnector;
-        this.trackDataMapper = trackDataMapper;
-        this.ownerDataMapper = ownerDataMapper;
     }
 
     public void create(String name, String username){
@@ -35,28 +30,6 @@ public class PlayListDataMapper {
             e.printStackTrace();
         }
     }
-
-//    public PlayList read(int id){
-//        PlayList playList = new PlayList();
-//        try {
-//            Statement stmt = databaseConnector.getConnection().createStatement();
-//            String query = String.format("select * from playlist where playlistid = %s", id);
-//            ResultSet resultSet = stmt.executeQuery(query);
-//            resultSet.next();
-//            playList.setId(resultSet.getInt("playlistid"));
-//            playList.setName(resultSet.getString("name"));
-//            playList.setOwner(ownerDataMapper.read(resultSet.getString("username")));
-//            query = String.format("select trackid from trackinplaylist where playlistid = %s", id);
-//            resultSet = stmt.executeQuery(query);
-//            while(resultSet.next()){
-//                Track track = trackDataMapper.read(resultSet.getInt("trackid"));
-//                playList.getTrackList().add(track);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return playList;
-//    }
 
     public void update(PlayList playList){
         try {
@@ -82,7 +55,7 @@ public class PlayListDataMapper {
         }
     }
 
-    public List<PlayList> readAll() {
+    public List<PlayList> readAll(){
         List<PlayList> allPlaylistList = new ArrayList<>();
         try {
             Statement stmt = databaseConnector.getConnection().createStatement();

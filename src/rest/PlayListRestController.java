@@ -18,8 +18,7 @@ import java.util.List;
 @Path("/")
 public class PlayListRestController {
 
-    @Inject
-    private ITokenService tokenService;
+    @Inject private ITokenService tokenService;
 
     @Inject private IPlayListService playListService;
 

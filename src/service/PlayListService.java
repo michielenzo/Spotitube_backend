@@ -11,12 +11,12 @@ import java.util.List;
 
 public class PlayListService implements IPlayListService{
 
-    private PlayListDataMapper playListDataMapper;
+    private IPlayListDataMapper playListDataMapper;
 
-    private OwnerDataMapper ownerDataMapper;
+    private IOwnerDataMapper ownerDataMapper;
 
     @Inject
-    public PlayListService(PlayListDataMapper playListDataMapper, OwnerDataMapper ownerDataMapper) {
+    public PlayListService(IPlayListDataMapper playListDataMapper, IOwnerDataMapper ownerDataMapper) {
         this.playListDataMapper = playListDataMapper;
         this.ownerDataMapper = ownerDataMapper;
     }

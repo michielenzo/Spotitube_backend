@@ -10,12 +10,12 @@ import javax.inject.Inject;
 
 public class LoginService implements ILoginService {
 
-    private TokenService tokenService;
+    private ITokenService tokenService;
 
-    private OwnerDataMapper ownerDataMapper;
+    private IOwnerDataMapper ownerDataMapper;
 
     @Inject
-    public LoginService(TokenService tokenService, OwnerDataMapper ownerDataMapper) {
+    public LoginService(ITokenService tokenService, IOwnerDataMapper ownerDataMapper) {
         this.tokenService = tokenService;
         this.ownerDataMapper = ownerDataMapper;
     }

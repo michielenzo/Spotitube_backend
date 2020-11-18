@@ -2,13 +2,14 @@ package datasource.datamapper;
 
 import datasource.IDatabaseConnector;
 import domain.objects.Owner;
+import service.IOwnerDataMapper;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class OwnerDataMapper {
+public class OwnerDataMapper implements IOwnerDataMapper{
 
     private IDatabaseConnector databaseConnector;
 

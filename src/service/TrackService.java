@@ -8,10 +8,10 @@ import java.util.List;
 
 public class TrackService implements ITrackService {
 
-    private TrackDataMapper trackDataMapper;
+    private ITrackDataMapper trackDataMapper;
 
     @Inject
-    public TrackService(TrackDataMapper trackDataMapper){
+    public TrackService(ITrackDataMapper trackDataMapper){
         this.trackDataMapper = trackDataMapper;
     }
 

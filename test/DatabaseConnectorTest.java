@@ -48,22 +48,6 @@ public class DatabaseConnectorTest {
 
         Connection connection = connector.getConnection();
 
-        //delete this
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.execute("update owner set username = 'mo', password = '12345' , token = 'blablabla' where username = 'mo'");
-//            ResultSet result = stmt.executeQuery("select * from owner where username = 'mo'");
-//            result.next();
-//            System.out.println(result.getString("password"));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
         Assert.assertNotNull(connection);
-    }
-
-    @Test
-    public void test() throws SqlParseException {
-        connector.getConnection();
     }
 }

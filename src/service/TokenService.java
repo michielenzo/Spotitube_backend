@@ -8,10 +8,10 @@ import java.util.Random;
 
 public class TokenService implements ITokenService {
 
-    private OwnerDataMapper ownerDataMapper;
+    private IOwnerDataMapper ownerDataMapper;
 
     @Inject
-    public TokenService(OwnerDataMapper ownerDataMapper) {
+    public TokenService(IOwnerDataMapper ownerDataMapper) {
         this.ownerDataMapper = ownerDataMapper;
     }
 

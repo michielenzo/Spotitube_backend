@@ -4,6 +4,7 @@ import datasource.IDatabaseConnector;
 import domain.objects.Song;
 import domain.objects.Track;
 import domain.objects.Video;
+import service.ITrackDataMapper;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -12,7 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrackDataMapper {
+public class TrackDataMapper implements ITrackDataMapper {
 
     private IDatabaseConnector databaseConnector;
 

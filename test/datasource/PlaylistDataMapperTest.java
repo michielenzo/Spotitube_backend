@@ -46,10 +46,7 @@ public class PlaylistDataMapperTest {
 
     @Before
     public void initialize(){
-        playListDataMapper = new PlayListDataMapper(
-                new OwnerDataMapper(databaseConnectorMock),
-                new TrackDataMapper(databaseConnectorMock),
-                databaseConnectorMock);
+        playListDataMapper = new PlayListDataMapper(databaseConnectorMock);
     }
 
     @Test
