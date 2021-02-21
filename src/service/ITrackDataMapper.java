@@ -1,8 +1,6 @@
 package service;
 
 import domain.objects.Track;
-
-import java.sql.ResultSet;
 import java.util.List;
 
 public interface ITrackDataMapper {

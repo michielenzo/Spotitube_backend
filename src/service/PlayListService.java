@@ -1,7 +1,5 @@
 package service;
 
-import datasource.datamapper.OwnerDataMapper;
-import datasource.datamapper.PlayListDataMapper;
 import domain.objects.Owner;
 import domain.objects.PlayList;
 import rest.dto.CreatePlayListRequest;

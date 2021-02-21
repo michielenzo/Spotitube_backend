@@ -1,6 +1,5 @@
 package service;
 
-import datasource.datamapper.OwnerDataMapper;
 import domain.objects.Owner;
 
 import javax.inject.Inject;
