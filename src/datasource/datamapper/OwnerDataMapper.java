@@ -1,13 +1,18 @@
 package datasource.datamapper;
 
+import com.couchbase.client.core.msg.query.QueryRequest;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.Collection;
+import com.couchbase.client.java.json.JsonArray;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.query.QueryOptions;
+import com.couchbase.client.java.query.QueryResult;
 import datasource.IDatabaseConnector;
 import domain.objects.Owner;
 import service.IOwnerDataMapper;
 
 import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public class OwnerDataMapper implements IOwnerDataMapper{
 
@@ -19,54 +24,41 @@ public class OwnerDataMapper implements IOwnerDataMapper{
     }
 
     public Owner read(String username){
+        Cluster cluster = databaseConnector.getConnection();
+
+        QueryResult result = cluster.query(
+                "SELECT * FROM spotitube.main.`User` WHERE username=?",
+                QueryOptions.queryOptions().parameters(JsonArray.from(username)));
+        JsonObject data = (JsonObject) result.rowsAsObject().get(0).get("User");
+
         Owner owner = new Owner();
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from owner where username = '%s'", username);
-            ResultSet resultSet = stmt.executeQuery(query);
-            if(resultSet.next()){
-                owner.setUsername(resultSet.getString("username"));
-                owner.setPassword(resultSet.getString("password"));
-                if(resultSet.getString("token") != null){
-                    owner.setToken(resultSet.getString("token"));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        owner.setUsername(username);
+        owner.setPassword(data.getString("password"));
+        owner.setToken(data.getString("token"));
+
         return owner;
     }
 
     public void update(String username, String password, String token){
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format(
-                    "update owner set username = '%s', password = '%s' , token = '%s' where username = '%s'",
-                    username,
-                    password,
-                    token,
-                    username);
-            stmt.execute(query);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Cluster cluster = databaseConnector.getConnection();
+        cluster.query(
+                "UPDATE spotitube.main.`User` SET username =?, `password` =?, token =? WHERE username =?",
+                QueryOptions.queryOptions().parameters(JsonArray.from(username, password, token, username)));
     }
 
     public Owner readByToken(String token) {
-        try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from owner where token = '%s'", token);
-            ResultSet resultSet = stmt.executeQuery(query);
-            if(resultSet.next()){
-                Owner owner = new Owner();
-                owner.setUsername(resultSet.getString("username"));
-                owner.setPassword(resultSet.getString("password"));
-                owner.setToken(token);
-                return owner;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        Cluster cluster = databaseConnector.getConnection();
+
+        QueryResult result = cluster.query(
+                "SELECT * FROM spotitube.main.`User` WHERE token=?",
+                QueryOptions.queryOptions().parameters(JsonArray.from(token)));
+        JsonObject data = (JsonObject) result.rowsAsObject().get(0).get("User");
+
+        Owner owner = new Owner();
+        owner.setToken(token);
+        owner.setPassword(data.getString("password"));
+        owner.setUsername(data.getString("username"));
+
+        return owner;
     }
 }

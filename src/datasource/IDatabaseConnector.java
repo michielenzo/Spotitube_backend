@@ -1,9 +1,10 @@
 package datasource;
 
-import java.sql.Connection;
+
+import com.couchbase.client.java.Cluster;
 
 public interface IDatabaseConnector {
 
-    Connection getConnection();
+    Cluster getConnection();
 }
 
