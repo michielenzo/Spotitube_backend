@@ -33,7 +33,7 @@ public class PlayListRestController {
     public Response createPlayList(@QueryParam("token") String token, CreatePlayListRequest playListDTO){
         if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
         playListService.createPlayList(playListDTO, token);
-        final List<PlayList> allPlayLists = playListService.getAllPlayLists();
+        final List<PlayList> allPlayLists = playListService.getAllPlayLists(token);
         final AllPlayListsResponse dto = dtoBuilderService.buildAllPlayListsResponseDTO(allPlayLists, token);
         return Response.status(Response.Status.OK).entity(dto).build();
     }
@@ -43,7 +43,7 @@ public class PlayListRestController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllPlaylists(@QueryParam("token") String token){
         if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
-        final List<PlayList> allPlayLists = playListService.getAllPlayLists();
+        final List<PlayList> allPlayLists = playListService.getAllPlayLists(token);
         final AllPlayListsResponse dto = dtoBuilderService.buildAllPlayListsResponseDTO(allPlayLists, token);
         return Response.status(Response.Status.OK).entity(dto).build();
     }
@@ -58,7 +58,7 @@ public class PlayListRestController {
     {
         if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
         playListService.changeName(dtoToDomainService.convertPlayListDTOToPlayList(playListDTO));
-        final List<PlayList> allPlayLists = playListService.getAllPlayLists();
+        final List<PlayList> allPlayLists = playListService.getAllPlayLists(token);
         final AllPlayListsResponse dto = dtoBuilderService.buildAllPlayListsResponseDTO(allPlayLists, token);
         return Response.status(Response.Status.OK).entity(dto).build();
     }
@@ -68,7 +68,7 @@ public class PlayListRestController {
     public Response deletePlayList(@QueryParam("token") String token, @PathParam("id") int id){
         if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
         playListService.deletePlayList(id);
-        final List<PlayList> allPlayLists = playListService.getAllPlayLists();
+        final List<PlayList> allPlayLists = playListService.getAllPlayLists(token);
         final AllPlayListsResponse dto = dtoBuilderService.buildAllPlayListsResponseDTO(allPlayLists, token);
         return Response.status(Response.Status.OK).entity(dto).build();
     }

@@ -7,8 +7,8 @@ import java.util.List;
 public interface IPlayListDataMapper {
 
     void create(String name, String username);
-    void update(PlayList playList);
+    void updateName(PlayList playList);
     void delete(int id);
-    List<PlayList> readAll();
+    List<PlayList> readAll(String token);
 
 }

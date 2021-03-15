@@ -20,8 +20,8 @@ public class PlayListService implements IPlayListService{
     }
 
     @Override
-    public List<PlayList> getAllPlayLists() {
-        return playListDataMapper.readAll();
+    public List<PlayList> getAllPlayLists(String token) {
+        return playListDataMapper.readAll(token);
     }
 
     @Override
@@ -37,6 +37,6 @@ public class PlayListService implements IPlayListService{
 
     @Override
     public void changeName(PlayList playList) {
-        playListDataMapper.update(playList);
+        playListDataMapper.updateName(playList);
     }
 }

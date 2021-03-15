@@ -1,5 +1,11 @@
 package datasource.datamapper;
 
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.json.JsonArray;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.query.QueryOptions;
+import com.couchbase.client.java.query.QueryResult;
+import com.sun.applet2.preloader.event.DownloadErrorEvent;
 import datasource.IDatabaseConnector;
 import datasource.DatabaseConnector;
 import domain.objects.*;
@@ -8,7 +14,6 @@ import service.IPlayListDataMapper;
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,103 +27,110 @@ public class PlayListDataMapper implements IPlayListDataMapper {
     }
 
     public void create(String name, String username){
-//        try {
-//            Statement stmt = databaseConnector.getConnection().createStatement();
-//            String query = String.format("insert into playlist (name, username) values ('%s','%s')", name, username);
-//            stmt.execute(query);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+        Cluster cluster = databaseConnector.getConnection();
+
+        QueryResult maxIdResult = cluster.query(
+                "SELECT MAX(playlists.id) as max " +
+                          "FROM spotitube.main.`User` UNNEST playlists",
+                QueryOptions.queryOptions().parameters(JsonArray.from(username)));
+        int maxID = maxIdResult.rowsAsObject().get(0).getInt("max");
+
+        cluster.query(
+                "UPDATE spotitube.main.`User` " +
+                          "SET playlists = ARRAY_APPEND(playlists, {'name':?, 'id':?}) " +
+                          "WHERE username =?",
+                QueryOptions.queryOptions().parameters(JsonArray.from(name, maxID + 1, username)));
     }
 
-    public void update(PlayList playList){
-//        try {
-//            Statement stmt = databaseConnector.getConnection().createStatement();
-//            String query = String.format("update playlist set name = '%s' where playlistid = %s",
-//                    playList.getName(),
-//                    playList.getId());
-//            stmt.execute(query);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+    public void updateName(PlayList playList){
+        Cluster cluster = databaseConnector.getConnection();
+
+        cluster.query(
+                "UPDATE spotitube.main.`User` " +
+                          "SET pl.name =? " +
+                          "FOR pl IN playlists WHEN pl.id =? END",
+                QueryOptions.queryOptions().parameters(JsonArray.from(playList.getName(), playList.getId())));
     }
 
     public void delete(int id){
-//        try {
-//            Statement stmt = databaseConnector.getConnection().createStatement();
-//            String query = String.format("delete from trackinplaylist where playlistid = %s", id);
-//            stmt.execute(query);
-//            query = String.format("delete from playlist where playlistid = %s", id);
-//            stmt.execute(query);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+        Cluster cluster = databaseConnector.getConnection();
+
+        cluster.query(
+                "UPDATE spotitube.main.`User` " +
+                          "SET playlists = ARRAY pl " +
+                          "FOR pl IN playlists WHEN pl.id != ? END",
+                QueryOptions.queryOptions().parameters(JsonArray.from(id)));
     }
 
-    public List<PlayList> readAll(){
+    public List<PlayList> readAll(String token){
+        Cluster cluster = databaseConnector.getConnection();
+
+        QueryResult resultUser = cluster.query(
+                "SELECT *" +
+                          "FROM spotitube.main.`User`" +
+                          "WHERE token = ?",
+                QueryOptions.queryOptions().parameters(JsonArray.from(token)));
+
+        JsonObject resultJson = resultUser.rowsAsObject().get(0).getObject("User");
+
         List<PlayList> allPlaylistList = new ArrayList<>();
-//        try {
-//            Statement stmt = databaseConnector.getConnection().createStatement();
-//            String query = "select pl.playlistid, pl.name, o.username, \n" +
-//                    "\t   o.password, o.token, \n" +
-//                    "\t   tip.trackid, t.title,\n" +
-//                    "\t   t.performer, t.playcount,\n" +
-//                    "\t   t.duration, t.offlineavailable,\n" +
-//                    "\t   t.album, t.publicationdate,\n" +
-//                    "\t   t.description\n" +
-//                    "from playlist pl\n" +
-//                    "left join owner o\n" +
-//                    "on o.username = pl.username\n" +
-//                    "left join trackinplaylist tip\n" +
-//                    "on tip.playlistid = pl.playlistid\n" +
-//                    "left join track t\n" +
-//                    "on t.trackid = tip.trackid\n" +
-//                    "order by pl.playlistid";
-//            ResultSet resultSet = stmt.executeQuery(query);
-//            int currentID = -1;
-//            PlayList playList = null;
-//            while (resultSet.next()){
-//                if(resultSet.getInt("playlistid") != currentID) {
-//                    if(playList != null) allPlaylistList.add(playList);
-//                    playList = new PlayList();
-//                    playList.setId(resultSet.getInt("playlistid"));
-//                    playList.setName(resultSet.getString("name"));
-//
-//                    Owner owner = new Owner();
-//                    owner.setUsername(resultSet.getString("username"));
-//                    owner.setPassword(resultSet.getString("password"));
-//                    owner.setToken(resultSet.getString("token"));
-//                    playList.setOwner(owner);
-//                    playList.setTrackList(new ArrayList<Track>());
-//                    currentID = resultSet.getInt("playlistid");
-//                }
-//                if(resultSet.getInt("trackid") > 0) {
-//                    Track track;
-//                    if (isSongg(resultSet)) {
-//                        track = new Song();
-//                        ((Song) track).setAlbum(resultSet.getString("album"));
-//                    } else {
-//                        track = new Video();
-//                        ((Video) track).setPublicationDate(resultSet.getString("publicationdate"));
-//                        ((Video) track).setDescription(resultSet.getString("description"));
-//                    }
-//                    track.setId(resultSet.getInt("trackid"));
-//                    track.setPerformer(resultSet.getString("performer"));
-//                    track.setTitle(resultSet.getString("title"));
-//                    track.setPlayCount(resultSet.getInt("playcount"));
-//                    track.setDuration(resultSet.getInt("duration"));
-//                    track.setOfflineAvailable(resultSet.getBoolean("offlineavailable"));
-//                    playList.getTrackList().add(track);
-//                }
-//            }
-//            if(playList != null) allPlaylistList.add(playList);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+
+        Owner owner = new Owner();
+        owner.setUsername(resultJson.getString("username"));
+        owner.setPassword(resultJson.getString("password"));
+        owner.setToken(token);
+
+        for (Object playlistJson : ((JsonArray)resultJson.get("playlists"))){
+            PlayList playlist = new PlayList();
+            playlist.setOwner(owner);
+
+            playlist.setName(((JsonObject)playlistJson).getString("name"));
+            playlist.setId(((JsonObject)playlistJson).getInt("id"));
+
+            ArrayList<Track> trackList = new ArrayList<>();
+
+            JsonArray tracksIds = ((JsonObject) playlistJson).getArray("tracksId");
+
+            for(int i = 0; i < tracksIds.size(); i++){
+                System.out.println(tracksIds.get(i));
+                QueryResult resultTrack = cluster.query(
+                        "SELECT *" +
+                                  "FROM spotitube.main.`Track`" +
+                                  "WHERE id =?",
+                        QueryOptions.queryOptions().parameters(JsonArray.from(tracksIds.get(i))));
+
+                JsonObject trackJson = resultTrack.rowsAsObject().get(0).getObject("Track");
+
+                Track track;
+                if(isSong(trackJson)){
+                    track = new Song();
+                    ((Song)track).setAlbum(trackJson.getString("album"));
+                }else{
+                    track = new Video();
+                    ((Video)track).setPublicationDate(trackJson.getString("publicationdate"));
+                    ((Video)track).setDescription(trackJson.getString("description"));
+                }
+
+                track.setDuration(trackJson.getInt("duration"));
+                track.setId(trackJson.getInt("id"));
+                track.setPerformer(trackJson.getString("performer"));
+                track.setTitle(trackJson.getString("title"));
+                track.setDuration(trackJson.getInt("duration"));
+                track.setOfflineAvailable(trackJson.getBoolean("offlineavailable"));
+                track.setPlayCount(trackJson.getInt("playcount"));
+
+                trackList.add(track);
+            }
+
+            playlist.setTrackList(trackList);
+
+            allPlaylistList.add(playlist);
+        }
+
         return allPlaylistList;
     }
 
-    private boolean isSongg(ResultSet resultSet) throws SQLException {
+    private boolean isSong(JsonObject resultSet){
         return resultSet.getString("album") != null;
     }
 }
