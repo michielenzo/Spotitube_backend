@@ -6,8 +6,8 @@ import java.util.List;
 public interface ITrackDataMapper {
 
     Track read(int id);
-    void update(Track track);
-    List<Track> readAll(int exceptForPlaylist);
+    void updateOfflineAvailable(Track track);
+    List<Track> readAllExcept(int exceptForPlaylist);
     List<Track> readByPlayList(int playListID);
     void removeTrackFromPlayList(int playListID, int trackID);
     void addTrackToPlayList(int playListID, Track track);

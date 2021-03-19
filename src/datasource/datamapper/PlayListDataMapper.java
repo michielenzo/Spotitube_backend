@@ -5,15 +5,12 @@ import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.query.QueryOptions;
 import com.couchbase.client.java.query.QueryResult;
-import com.sun.applet2.preloader.event.DownloadErrorEvent;
 import datasource.IDatabaseConnector;
 import datasource.DatabaseConnector;
 import domain.objects.*;
 import service.IPlayListDataMapper;
 
 import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,25 +27,29 @@ public class PlayListDataMapper implements IPlayListDataMapper {
         Cluster cluster = databaseConnector.getConnection();
 
         QueryResult maxIdResult = cluster.query(
-                "SELECT MAX(playlists.id) as max " +
-                          "FROM spotitube.main.`User` UNNEST playlists",
-                QueryOptions.queryOptions().parameters(JsonArray.from(username)));
+                "SELECT MAX(id) AS max " +
+                          "FROM spotitube.main.Playlist");
         int maxID = maxIdResult.rowsAsObject().get(0).getInt("max");
 
         cluster.query(
-                "UPDATE spotitube.main.`User` " +
-                          "SET playlists = ARRAY_APPEND(playlists, {'name':?, 'id':?}) " +
+                "INSERT INTO spotitube.main.Playlist (KEY, VALUE)\n" +
+                          "VALUES (\"playlist4\", { \"id\":?, \"name\":?, \"tracksId\":[]})",
+                QueryOptions.queryOptions().parameters(JsonArray.from(maxID + 1, name)));
+
+        cluster.query(
+                "UPDATE spotitube.main.`User`\n" +
+                          "SET playlistIds = ARRAY_APPEND(playlistIds, ?)\n" +
                           "WHERE username =?",
-                QueryOptions.queryOptions().parameters(JsonArray.from(name, maxID + 1, username)));
+                QueryOptions.queryOptions().parameters(JsonArray.from(maxID + 1, username)));
     }
 
     public void updateName(PlayList playList){
         Cluster cluster = databaseConnector.getConnection();
 
         cluster.query(
-                "UPDATE spotitube.main.`User` " +
-                          "SET pl.name =? " +
-                          "FOR pl IN playlists WHEN pl.id =? END",
+                "UPDATE spotitube.main.`Playlist` " +
+                          "SET name =? " +
+                          "WHERE id =?",
                 QueryOptions.queryOptions().parameters(JsonArray.from(playList.getName(), playList.getId())));
     }
 
@@ -56,13 +57,17 @@ public class PlayListDataMapper implements IPlayListDataMapper {
         Cluster cluster = databaseConnector.getConnection();
 
         cluster.query(
+                "DELETE FROM spotitube.main.Playlist " +
+                          "WHERE id =?",
+                QueryOptions.queryOptions().parameters(JsonArray.from(id)));
+
+        cluster.query(
                 "UPDATE spotitube.main.`User` " +
-                          "SET playlists = ARRAY pl " +
-                          "FOR pl IN playlists WHEN pl.id != ? END",
+                          "SET playlistIds = ARRAY_REMOVE(playlistIds, ?)",
                 QueryOptions.queryOptions().parameters(JsonArray.from(id)));
     }
 
-    public List<PlayList> readAll(String token){
+    public List<PlayList> readAllFromUser(String token){
         Cluster cluster = databaseConnector.getConnection();
 
         QueryResult resultUser = cluster.query(
@@ -73,53 +78,42 @@ public class PlayListDataMapper implements IPlayListDataMapper {
 
         JsonObject resultJson = resultUser.rowsAsObject().get(0).getObject("User");
 
-        List<PlayList> allPlaylistList = new ArrayList<>();
-
         Owner owner = new Owner();
         owner.setUsername(resultJson.getString("username"));
         owner.setPassword(resultJson.getString("password"));
         owner.setToken(token);
 
-        for (Object playlistJson : ((JsonArray)resultJson.get("playlists"))){
+        JsonArray playlistIdsJsonArray = resultJson.getArray("playlistIds");
+
+        List<PlayList> allPlaylistList = new ArrayList<>();
+
+        for(int i = 0; i < playlistIdsJsonArray.size(); i++){
             PlayList playlist = new PlayList();
             playlist.setOwner(owner);
 
-            playlist.setName(((JsonObject)playlistJson).getString("name"));
-            playlist.setId(((JsonObject)playlistJson).getInt("id"));
+            QueryResult queryResult2 = cluster.query(
+                    "SELECT * " +
+                              "FROM spotitube.main.Playlist " +
+                              "WHERE id =?",
+                    QueryOptions.queryOptions().parameters(JsonArray.from(playlistIdsJsonArray.get(i))));
+
+            JsonObject playlistJson = queryResult2.rowsAsObject().get(0).getObject("Playlist");
+
+            playlist.setId(playlistJson.getInt("id"));
+            playlist.setName(playlistJson.getString("name"));
 
             ArrayList<Track> trackList = new ArrayList<>();
+            JsonArray trackIdsJsonArray = playlistJson.getArray("tracksId");
 
-            JsonArray tracksIds = ((JsonObject) playlistJson).getArray("tracksId");
-
-            for(int i = 0; i < tracksIds.size(); i++){
-                System.out.println(tracksIds.get(i));
-                QueryResult resultTrack = cluster.query(
-                        "SELECT *" +
-                                  "FROM spotitube.main.`Track`" +
+            for(int j = 0; j < trackIdsJsonArray.size(); j++){
+                QueryResult queryResult3 = cluster.query(
+                        "SELECT * " +
+                                  "FROM spotitube.main.Track " +
                                   "WHERE id =?",
-                        QueryOptions.queryOptions().parameters(JsonArray.from(tracksIds.get(i))));
+                        QueryOptions.queryOptions().parameters(JsonArray.from(trackIdsJsonArray.get(j))));
 
-                JsonObject trackJson = resultTrack.rowsAsObject().get(0).getObject("Track");
-
-                Track track;
-                if(isSong(trackJson)){
-                    track = new Song();
-                    ((Song)track).setAlbum(trackJson.getString("album"));
-                }else{
-                    track = new Video();
-                    ((Video)track).setPublicationDate(trackJson.getString("publicationdate"));
-                    ((Video)track).setDescription(trackJson.getString("description"));
-                }
-
-                track.setDuration(trackJson.getInt("duration"));
-                track.setId(trackJson.getInt("id"));
-                track.setPerformer(trackJson.getString("performer"));
-                track.setTitle(trackJson.getString("title"));
-                track.setDuration(trackJson.getInt("duration"));
-                track.setOfflineAvailable(trackJson.getBoolean("offlineavailable"));
-                track.setPlayCount(trackJson.getInt("playcount"));
-
-                trackList.add(track);
+                JsonObject trackJson = queryResult3.rowsAsObject().get(0).getObject("Track");
+                trackList.add(Track.fromJson(trackJson));
             }
 
             playlist.setTrackList(trackList);
@@ -128,9 +122,5 @@ public class PlayListDataMapper implements IPlayListDataMapper {
         }
 
         return allPlaylistList;
-    }
-
-    private boolean isSong(JsonObject resultSet){
-        return resultSet.getString("album") != null;
     }
 }

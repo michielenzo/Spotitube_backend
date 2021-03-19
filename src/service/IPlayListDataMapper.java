@@ -9,6 +9,6 @@ public interface IPlayListDataMapper {
     void create(String name, String username);
     void updateName(PlayList playList);
     void delete(int id);
-    List<PlayList> readAll(String token);
+    List<PlayList> readAllFromUser(String token);
 
 }

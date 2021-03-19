@@ -26,7 +26,7 @@ public class TrackServiceTest {
     @Test
     public void test_getAllTracks_method(){
         trackService.getAllTracks(1);
-        Mockito.verify(trackDataMapper).readAll(1);
+        Mockito.verify(trackDataMapper).readAllExcept(1);
     }
 
     @Test
@@ -52,6 +52,6 @@ public class TrackServiceTest {
     public void test_updateOfflineAvailable(){
         Track track = new Video();
         trackService.updateOfflineAvailable(track);
-        Mockito.verify(trackDataMapper).update(track);
+        Mockito.verify(trackDataMapper).updateOfflineAvailable(track);
     }
 }

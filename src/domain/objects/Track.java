@@ -1,5 +1,7 @@
 package domain.objects;
 
+import com.couchbase.client.java.json.JsonObject;
+
 public abstract class Track {
 
     private int id;
@@ -48,4 +50,27 @@ public abstract class Track {
     public int getPlayCount() { return playCount; }
 
     public void setPlayCount(int playCount) { this.playCount = playCount; }
+
+    public static Track fromJson(JsonObject json){
+        Track track;
+
+        if(json.getString("album") != null){
+            track = new Song();
+            ((Song)track).setAlbum(json.getString("album"));
+        }else{
+            track = new Video();
+            ((Video)track).setPublicationDate(json.getString("publicationdate"));
+            ((Video)track).setDescription(json.getString("description"));
+        }
+
+        track.setDuration(json.getInt("duration"));
+        track.setId(json.getInt("id"));
+        track.setPerformer(json.getString("performer"));
+        track.setTitle(json.getString("title"));
+        track.setDuration(json.getInt("duration"));
+        track.setOfflineAvailable(json.getBoolean("offlineavailable"));
+        track.setPlayCount(json.getInt("playcount"));
+
+        return track;
+    }
 }

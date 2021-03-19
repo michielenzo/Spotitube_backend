@@ -1,9 +1,6 @@
 package datasource.datamapper;
 
-import com.couchbase.client.core.msg.query.QueryRequest;
-import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.query.QueryOptions;

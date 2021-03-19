@@ -16,7 +16,7 @@ public class TrackService implements ITrackService {
 
     @Override
     public List<Track> getAllTracks(int exceptForPlaylist) {
-        return trackDataMapper.readAll(exceptForPlaylist);
+        return trackDataMapper.readAllExcept(exceptForPlaylist);
     }
 
     @Override
@@ -36,6 +36,6 @@ public class TrackService implements ITrackService {
 
     @Override
     public void updateOfflineAvailable(Track track) {
-        trackDataMapper.update(track);
+        trackDataMapper.updateOfflineAvailable(track);
     }
 }

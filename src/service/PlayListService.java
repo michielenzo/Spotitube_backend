@@ -21,7 +21,7 @@ public class PlayListService implements IPlayListService{
 
     @Override
     public List<PlayList> getAllPlayLists(String token) {
-        return playListDataMapper.readAll(token);
+        return playListDataMapper.readAllFromUser(token);
     }
 
     @Override
