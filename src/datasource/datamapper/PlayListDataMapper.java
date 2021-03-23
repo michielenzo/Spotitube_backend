@@ -33,7 +33,7 @@ public class PlayListDataMapper implements IPlayListDataMapper {
 
         cluster.query(
                 "INSERT INTO spotitube.main.Playlist (KEY, VALUE)\n" +
-                          "VALUES (\"playlist4\", { \"id\":?, \"name\":?, \"tracksId\":[]})",
+                          "VALUES (\""+ (maxID + 1) +"\", { \"id\":?, \"name\":?, \"tracksId\":[]})",
                 QueryOptions.queryOptions().parameters(JsonArray.from(maxID + 1, name)));
 
         cluster.query(
