@@ -12,10 +12,7 @@ import org.mockito.internal.exceptions.stacktrace.ConditionalStackTraceFilter;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.Period;
 import java.util.List;
 
@@ -30,7 +27,7 @@ public class TrackDataMapperTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
     @Mock private DatabaseConnector databaseConnectorMock;
     @Mock private Connection connectionMock;
-    @Mock private Statement statementMock;
+    @Mock private PreparedStatement statementMock;
     @Mock private ResultSet resultSetMock;
 
     private static final String ALBUM_NAME = "rock 'n roll";
@@ -53,9 +50,11 @@ public class TrackDataMapperTest {
     public void testThat_Read_MethodCanBuildA_Song_DomainObject() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("select * from track where trackid = ?"))
+                    .thenReturn(statementMock);
 
-            when(statementMock.executeQuery("select * from track where trackid = 1")).thenReturn(resultSetMock);
+            when(statementMock.executeQuery()).thenReturn(resultSetMock);
 
             when(resultSetMock.next()).thenReturn(true);
             when(resultSetMock.getString("album")).thenReturn(ALBUM_NAME);
@@ -83,17 +82,18 @@ public class TrackDataMapperTest {
     public void testThat_ReadAll_MethodWorks() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement(
+                            "select * from track " +
+                            "where trackid not in ( " +
+                            "select distinct t.trackID " +
+                            "from track t " +
+                            "left join trackinplayList tip " +
+                            "on tip.trackid = t.trackid " +
+                            "where tip.playlistid = ?)"))
+                    .thenReturn(statementMock);
 
-            when(statementMock.executeQuery("select *\n" +
-                    "from track\n" +
-                    "where trackid not in (\n" +
-                    "\tselect distinct t.trackID\n" +
-                    "\tfrom track t\n" +
-                    "\tleft join trackinplayList tip\n" +
-                    "\ton tip.trackid = t.trackid\n" +
-                    "\twhere tip.playlistid = 1\n" +
-                    ")")).thenReturn(resultSetMock);
+            when(statementMock.executeQuery()).thenReturn(resultSetMock);
 
             when(resultSetMock.next()).thenReturn(true).thenReturn(true).thenReturn(false);
 
@@ -197,7 +197,10 @@ public class TrackDataMapperTest {
     public void testThat_update_methodWorks() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement(
+                     "update track set performer = ?,title = ?,playcount = ?,duration = ?,offlineavailable = ?, album = ? where trackid = ?"))
+                    .thenReturn(statementMock);
 
             Song track = new Song();
             track.setId(TRACK_ID);
@@ -209,9 +212,7 @@ public class TrackDataMapperTest {
 
             trackDataMapper.update(track);
 
-            verify(statementMock).execute("update track set performer = 'a'," +
-                    "title = 'b'," + "playcount = 0," +
-                    "duration = 22," + "offlineavailable = 1,album = 'c' where trackid = 1");
+            verify(statementMock).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

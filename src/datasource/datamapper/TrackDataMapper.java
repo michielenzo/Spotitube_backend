@@ -1,5 +1,6 @@
 package datasource.datamapper;
 
+import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
 import datasource.IDatabaseConnector;
 import domain.objects.Song;
 import domain.objects.Track;
@@ -7,6 +8,7 @@ import domain.objects.Video;
 import service.ITrackDataMapper;
 
 import javax.inject.Inject;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,40 +27,48 @@ public class TrackDataMapper implements ITrackDataMapper {
     public Track read(int id){
         Track track = null;
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from track where trackid = %s", id);
-            ResultSet resultSet = stmt.executeQuery(query);
+            String query = "select * from track where trackid = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setInt(1, id);
+
+            ResultSet resultSet = statement.executeQuery();
             if(resultSet.next()){
                 track = buildTrack(resultSet);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return track;
     }
 
     public void update(Track track){
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            int bit = 0;
-            if(track.isOfflineAvailable()){ bit = 1; }
-            String query = String.format("update track set performer = '%s'," +
-                    "title = '%s'," + "playcount = %s," +
-                    "duration = %s," + "offlineavailable = %s,",
-                    track.getPerformer(), track.getTitle(),
-                    track.getPlayCount(), track.getDuration(),
-                    bit);
+            String query = String.format(
+                    "update track set performer = ?," +
+                    "title = ?," + "playcount = ?," +
+                    "duration = ?," + "offlineavailable = ?, %s %s",
+                    track instanceof Song ? "album = ?" : "publicationdate = ?, description = ?",
+                    "where trackid = ?");
+
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+
+            statement.setString(1, track.getPerformer());
+            statement.setString(2, track.getTitle());
+            statement.setInt(3, track.getPlayCount());
+            statement.setInt(4, track.getDuration());
+            statement.setBoolean(5, track.isOfflineAvailable());
+
             if(track instanceof Song){
-                query += String.format("album = '%s'",
-                        ((Song)track).getAlbum());
-            }else {
-                query += String.format("publicationdate = '%s'," +
-                        "description = '%s'",
-                        ((Video)track).getPublicationDate(),
-                        ((Video)track).getDescription());
+                statement.setString(6, ((Song) track).getAlbum());
+                statement.setInt(7, track.getId());
+            } else {
+                statement.setString(6, ((Video) track).getPublicationDate());
+                statement.setString(7, ((Video) track).getDescription());
+                statement.setInt(8, track.getId());
             }
-            query += String.format(" where trackid = %s", track.getId());
-            stmt.execute(query);
+
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -67,22 +77,19 @@ public class TrackDataMapper implements ITrackDataMapper {
     public List<Track> readAll(int exceptForPlaylist) {
         List<Track> trackList = new ArrayList<>();
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query;
-            if(exceptForPlaylist == 0){
-                query = "select * from track";
-            }else {
-                query = String.format("select *\n" +
-                        "from track\n" +
-                        "where trackid not in (\n" +
-                        "\tselect distinct t.trackID\n" +
-                        "\tfrom track t\n" +
-                        "\tleft join trackinplayList tip\n" +
-                        "\ton tip.trackid = t.trackid\n" +
-                        "\twhere tip.playlistid = %s\n" +
-                        ")", exceptForPlaylist);
-            }
-            ResultSet resultSet = stmt.executeQuery(query);
+            String query = exceptForPlaylist == 0
+                    ?   "select * from track"
+                    :   "select * from track " +
+                        "where trackid not in ( " +
+                        "select distinct t.trackID " +
+                        "from track t " +
+                        "left join trackinplayList tip " +
+                        "on tip.trackid = t.trackid " +
+                        "where tip.playlistid = ?)";
+
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
             while(resultSet.next()){
                 trackList.add(buildTrack(resultSet));
             }
