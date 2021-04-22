@@ -9,10 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -26,7 +23,7 @@ public class OwnerDataMapperTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
     @Mock private DatabaseConnector databaseConnectorMock;
     @Mock private Connection connectionMock;
-    @Mock private Statement statementMock;
+    @Mock private PreparedStatement statementMock;
     @Mock private ResultSet resultSetMock;
 
     private static final String USERNAME = "user123";
@@ -40,10 +37,13 @@ public class OwnerDataMapperTest {
 
     @Test
     public void test_read_method() {
+
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
-            when(statementMock.executeQuery("select * from owner where username = 'user123'")).thenReturn(resultSetMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("select * from owner where username = ?"))
+                    .thenReturn(statementMock);
+            when(statementMock.executeQuery()).thenReturn(resultSetMock);
             when(resultSetMock.next()).thenReturn(true);
             when(resultSetMock.getString("username")).thenReturn(USERNAME);
             when(resultSetMock.getString("password")).thenReturn(PASSWORD);
@@ -63,8 +63,10 @@ public class OwnerDataMapperTest {
     public void test_readByToken_method()  {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
-            when(statementMock.executeQuery("select * from owner where token = '1234-1234-1234'")).thenReturn(resultSetMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("select * from owner where token = ?"))
+                    .thenReturn(statementMock);
+            when(statementMock.executeQuery()).thenReturn(resultSetMock);
             when(resultSetMock.next()).thenReturn(true);
             when(resultSetMock.getString("username")).thenReturn(USERNAME);
             when(resultSetMock.getString("password")).thenReturn(PASSWORD);
@@ -80,11 +82,13 @@ public class OwnerDataMapperTest {
     }
 
     @Test
-    public void test_readByToken_method_returnsNullWhenOwnerDOesNotExist(){
+    public void test_readByToken_method_returnsNullWhenOwnerDoesNotExist(){
         try{
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
-            when(statementMock.executeQuery("select * from owner where token = '1234-1234-1234'")).thenReturn(resultSetMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("select * from owner where token = ?"))
+                    .thenReturn(statementMock);
+            when(statementMock.executeQuery()).thenReturn(resultSetMock);
             when(resultSetMock.next()).thenReturn(false);
 
             Owner owner = ownerDataMapper.readByToken(TOKEN);
@@ -99,11 +103,11 @@ public class OwnerDataMapperTest {
     public void test_update_method() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
-
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("update owner set username = ?, password = ? , token = ? where username = ?"))
+                    .thenReturn(statementMock);
             ownerDataMapper.update(USERNAME, PASSWORD,TOKEN);
-
-            verify(statementMock).execute("update owner set username = 'user123', password = 'password' , token = '1234-1234-1234' where username = 'user123'");
+            verify(statementMock).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

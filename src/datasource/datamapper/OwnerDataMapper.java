@@ -5,6 +5,7 @@ import domain.objects.Owner;
 import service.IOwnerDataMapper;
 
 import javax.inject.Inject;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,10 +21,14 @@ public class OwnerDataMapper implements IOwnerDataMapper{
 
     public Owner read(String username){
         Owner owner = new Owner();
+
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from owner where username = '%s'", username);
-            ResultSet resultSet = stmt.executeQuery(query);
+            String query = "select * from owner where username = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setString(1, username);
+
+            ResultSet resultSet = statement.executeQuery();
+
             if(resultSet.next()){
                 owner.setUsername(resultSet.getString("username"));
                 owner.setPassword(resultSet.getString("password"));
@@ -39,14 +44,13 @@ public class OwnerDataMapper implements IOwnerDataMapper{
 
     public void update(String username, String password, String token){
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format(
-                    "update owner set username = '%s', password = '%s' , token = '%s' where username = '%s'",
-                    username,
-                    password,
-                    token,
-                    username);
-            stmt.execute(query);
+            String query = "update owner set username = ?, password = ? , token = ? where username = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setString(1, username);
+            statement.setString(2, password);
+            statement.setString(3, token);
+            statement.setString(4, username);
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -54,9 +58,11 @@ public class OwnerDataMapper implements IOwnerDataMapper{
 
     public Owner readByToken(String token) {
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from owner where token = '%s'", token);
-            ResultSet resultSet = stmt.executeQuery(query);
+            String query = "select * from owner where token = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setString(1, token);
+            ResultSet resultSet = statement.executeQuery();
+
             if(resultSet.next()){
                 Owner owner = new Owner();
                 owner.setUsername(resultSet.getString("username"));
