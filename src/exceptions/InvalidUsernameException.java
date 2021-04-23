@@ -1,4 +1,3 @@
 package exceptions;
 
-public class InvalidUsernameException extends Exception {
-}
+public class InvalidUsernameException extends RuntimeException {}

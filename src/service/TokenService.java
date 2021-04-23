@@ -21,6 +21,7 @@ public class TokenService implements ITokenService {
         final int targetStringLength = 10;
         Random random = new Random();
         StringBuilder buffer = new StringBuilder(targetStringLength);
+
         for (int i = 0; i < targetStringLength; i++) {
             int randomLimitedInt = leftLimit + (int)
                     (random.nextFloat() * (rightLimit - leftLimit + 1));

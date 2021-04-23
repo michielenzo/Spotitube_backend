@@ -28,9 +28,7 @@ public class LoginService implements ILoginService {
         return token;
     }
 
-    private void validateLoginRequest(Owner owner, LoginRequest loginRequest)
-            throws InvalidUsernameException, InvalidPasswordException
-    {
+    private void validateLoginRequest(Owner owner, LoginRequest loginRequest) {
         if(owner.getUsername() == null){
             throw new InvalidUsernameException();
         }else if(!owner.getPassword().equals(loginRequest.getPassword())){

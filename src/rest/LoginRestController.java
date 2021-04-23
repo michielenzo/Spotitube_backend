@@ -24,13 +24,7 @@ public class LoginRestController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response loginAttempt(LoginRequest loginRequest){
-        String token;
-
-        try { token = loginService.login(loginRequest); }
-        catch (InvalidPasswordException | InvalidUsernameException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
+        String token = loginService.login(loginRequest);
 
         LoginResponse response = new LoginResponse();
         response.setToken(token);
