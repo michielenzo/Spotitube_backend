@@ -3,6 +3,7 @@ package datasource.datamapper;
 import datasource.IDatabaseConnector;
 import datasource.DatabaseConnector;
 import domain.objects.*;
+import exceptions.DatabaseException;
 import service.IPlayListDataMapper;
 
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ public class PlayListDataMapper implements IPlayListDataMapper {
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
@@ -44,6 +46,7 @@ public class PlayListDataMapper implements IPlayListDataMapper {
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
@@ -62,6 +65,7 @@ public class PlayListDataMapper implements IPlayListDataMapper {
             deleteFromPlaylistStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
@@ -124,6 +128,7 @@ public class PlayListDataMapper implements IPlayListDataMapper {
             if(playList != null) allPlaylistList.add(playList);
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
         return allPlaylistList;
     }

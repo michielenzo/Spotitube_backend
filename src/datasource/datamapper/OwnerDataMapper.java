@@ -2,6 +2,7 @@ package datasource.datamapper;
 
 import datasource.IDatabaseConnector;
 import domain.objects.Owner;
+import exceptions.DatabaseException;
 import service.IOwnerDataMapper;
 
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ public class OwnerDataMapper implements IOwnerDataMapper{
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
         return owner;
     }
@@ -53,6 +55,7 @@ public class OwnerDataMapper implements IOwnerDataMapper{
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
@@ -72,6 +75,7 @@ public class OwnerDataMapper implements IOwnerDataMapper{
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
         return null;
     }

@@ -5,6 +5,7 @@ import datasource.IDatabaseConnector;
 import domain.objects.Song;
 import domain.objects.Track;
 import domain.objects.Video;
+import exceptions.DatabaseException;
 import service.ITrackDataMapper;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ public class TrackDataMapper implements ITrackDataMapper {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
 
         return track;
@@ -71,6 +73,7 @@ public class TrackDataMapper implements ITrackDataMapper {
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
@@ -96,6 +99,7 @@ public class TrackDataMapper implements ITrackDataMapper {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
         return trackList;
     }
@@ -118,6 +122,7 @@ public class TrackDataMapper implements ITrackDataMapper {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
         return trackList;
     }
@@ -132,6 +137,7 @@ public class TrackDataMapper implements ITrackDataMapper {
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
@@ -144,6 +150,7 @@ public class TrackDataMapper implements ITrackDataMapper {
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DatabaseException();
         }
     }
 
