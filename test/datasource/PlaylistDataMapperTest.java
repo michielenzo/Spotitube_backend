@@ -11,15 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class PlaylistDataMapperTest {
 
@@ -28,7 +24,7 @@ public class PlaylistDataMapperTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
     @Mock private DatabaseConnector databaseConnectorMock;
     @Mock private Connection connectionMock;
-    @Mock private Statement statementMock;
+    @Mock private PreparedStatement statementMock;
     @Mock private ResultSet resultSetMock;
 
     private static final String ALBUM_NAME = "rock 'n roll";
@@ -53,11 +49,13 @@ public class PlaylistDataMapperTest {
     public void test_create_method() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("insert into playlist (name, username) values (?,?)"))
+                    .thenReturn(statementMock);
 
             playListDataMapper.create(PLAYLIST_NAME, USERNAME);
 
-            verify(statementMock).execute("insert into playlist (name, username) values ('l1','user123')");
+            verify(statementMock).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -67,11 +65,17 @@ public class PlaylistDataMapperTest {
     public void test_delete_method() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("delete from trackinplaylist where playlistid = ?"))
+                    .thenReturn(statementMock);
+
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("delete from playlist where playlistid = ?"))
+                    .thenReturn(statementMock);
 
             playListDataMapper.delete(1);
 
-            verify(statementMock).execute("delete from trackinplaylist where playlistid = 1");
+            verify(statementMock, times(2)).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -82,7 +86,9 @@ public class PlaylistDataMapperTest {
 
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("update playlist set name = ? where playlistid = ?"))
+                    .thenReturn(statementMock);
 
             PlayList playList = new PlayList();
             playList.setId(TRACK_ID);
@@ -90,7 +96,7 @@ public class PlaylistDataMapperTest {
 
             playListDataMapper.update(playList);
 
-            verify(statementMock).execute("update playlist set name = 'l1' where playlistid = 1");
+            verify(statementMock).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

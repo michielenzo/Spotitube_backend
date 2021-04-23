@@ -6,6 +6,7 @@ import domain.objects.*;
 import service.IPlayListDataMapper;
 
 import javax.inject.Inject;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,9 +24,12 @@ public class PlayListDataMapper implements IPlayListDataMapper {
 
     public void create(String name, String username){
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("insert into playlist (name, username) values ('%s','%s')", name, username);
-            stmt.execute(query);
+            String query = "insert into playlist (name, username) values (?,?)";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setString(1, name);
+            statement.setString(2, username);
+
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -33,11 +37,11 @@ public class PlayListDataMapper implements IPlayListDataMapper {
 
     public void update(PlayList playList){
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("update playlist set name = '%s' where playlistid = %s",
-                    playList.getName(),
-                    playList.getId());
-            stmt.execute(query);
+            String query = "update playlist set name = ? where playlistid = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setString(1, playList.getName());
+            statement.setInt(2, playList.getId());
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -45,11 +49,17 @@ public class PlayListDataMapper implements IPlayListDataMapper {
 
     public void delete(int id){
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("delete from trackinplaylist where playlistid = %s", id);
-            stmt.execute(query);
-            query = String.format("delete from playlist where playlistid = %s", id);
-            stmt.execute(query);
+            String query = "delete from trackinplaylist where playlistid = ?";
+            PreparedStatement deleteFromTrackInPlaylistStatement = databaseConnector.getConnection()
+                    .prepareStatement(query);
+            deleteFromTrackInPlaylistStatement.setInt(1, id);
+            deleteFromTrackInPlaylistStatement.execute();
+
+            String query2 = "delete from playlist where playlistid = ?";
+            PreparedStatement deleteFromPlaylistStatement = databaseConnector.getConnection()
+                    .prepareStatement(query2);
+            deleteFromPlaylistStatement.setInt(1, id);
+            deleteFromPlaylistStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
