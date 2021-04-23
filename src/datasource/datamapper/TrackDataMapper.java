@@ -102,12 +102,16 @@ public class TrackDataMapper implements ITrackDataMapper {
     public List<Track> readByPlayList(int playListID) {
         List<Track> trackList = new ArrayList<>();
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("select * from track t\n" +
-                    "inner join trackinplaylist tip\n" +
-                    "on tip.trackid = t.trackid\n" +
-                    "where tip.playlistid = %s", playListID);
-            ResultSet resultSet = stmt.executeQuery(query);
+            String query =
+                    "select * from track t " +
+                    "inner join trackinplaylist tip " +
+                    "on tip.trackid = t.trackid " +
+                    "where tip.playlistid = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setInt(1, playListID);
+
+            ResultSet resultSet = statement.executeQuery();
+
             while(resultSet.next()){
                 trackList.add(buildTrack(resultSet));
             }
@@ -119,10 +123,12 @@ public class TrackDataMapper implements ITrackDataMapper {
 
     public void removeTrackFromPlayList(int playListID, int trackID) {
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("delete from trackinplaylist " +
-                    "where playlistid = %s and trackid = %s", playListID, trackID);
-            stmt.execute(query);
+            String query = "delete from trackinplaylist where playlistid = ? and trackid = ?";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setInt(1, playListID);
+            statement.setInt(2, trackID);
+
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -130,9 +136,11 @@ public class TrackDataMapper implements ITrackDataMapper {
 
     public void addTrackToPlayList(int playListID, Track track) {
         try {
-            Statement stmt = databaseConnector.getConnection().createStatement();
-            String query = String.format("insert into trackinplaylist values (%s, %s)", playListID, track.getId());
-            stmt.execute(query);
+            String query = "insert into trackinplaylist values (?, ?)";
+            PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setInt(1, playListID);
+            statement.setInt(2, track.getId());
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

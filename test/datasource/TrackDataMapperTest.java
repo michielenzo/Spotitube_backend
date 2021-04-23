@@ -126,13 +126,14 @@ public class TrackDataMapperTest {
     public void testThat_readByPlaylist_methodWorks() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement(
+                            "select * from track t " +
+                            "inner join trackinplaylist tip " +
+                            "on tip.trackid = t.trackid " +
+                            "where tip.playlistid = ?")).thenReturn(statementMock);
 
-            when(statementMock.executeQuery("select * from track t\n" +
-                    "inner join trackinplaylist tip\n" +
-                    "on tip.trackid = t.trackid\n" +
-                    "where tip.playlistid = 1"
-            )).thenReturn(resultSetMock);
+            when(statementMock.executeQuery()).thenReturn(resultSetMock);
 
             when(resultSetMock.next()).thenReturn(true).thenReturn(false);
 
@@ -165,12 +166,13 @@ public class TrackDataMapperTest {
     public void testThat_removeTrackFromPlaylistWorks() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("delete from trackinplaylist where playlistid = ? and trackid = ?"))
+                    .thenReturn(statementMock);
 
             trackDataMapper.removeTrackFromPlayList(PLAYLIST_ID, TRACK_ID);
 
-            verify(statementMock).execute("delete from trackinplaylist " +
-                    "where playlistid = 1 and trackid = 1");
+            verify(statementMock).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -180,14 +182,16 @@ public class TrackDataMapperTest {
     public void testThat_addTrackToPlaylist_methodWorks() {
         try {
             when(databaseConnectorMock.getConnection()).thenReturn(connectionMock);
-            when(databaseConnectorMock.getConnection().createStatement()).thenReturn(statementMock);
+            when(databaseConnectorMock.getConnection()
+                    .prepareStatement("insert into trackinplaylist values (?, ?)"))
+                    .thenReturn(statementMock);
 
             Track track = new Song();
             track.setId(TRACK_ID);
 
             trackDataMapper.addTrackToPlayList(PLAYLIST_ID, track);
 
-            verify(statementMock).execute("insert into trackinplaylist values (1, 1)");
+            verify(statementMock).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
