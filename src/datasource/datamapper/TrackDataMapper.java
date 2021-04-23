@@ -88,6 +88,7 @@ public class TrackDataMapper implements ITrackDataMapper {
                         "where tip.playlistid = ?)";
 
             PreparedStatement statement = databaseConnector.getConnection().prepareStatement(query);
+            statement.setInt(1, exceptForPlaylist);
             ResultSet resultSet = statement.executeQuery();
 
             while(resultSet.next()){
