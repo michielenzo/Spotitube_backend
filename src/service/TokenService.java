@@ -1,6 +1,7 @@
 package service;
 
 import domain.objects.Owner;
+import exceptions.InvalidTokenException;
 
 import javax.inject.Inject;
 import java.util.Random;
@@ -31,8 +32,8 @@ public class TokenService implements ITokenService {
     }
 
     @Override
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         final Owner owner = ownerDataMapper.readByToken(token);
-        return owner != null;
+        if (owner == null) throw new InvalidTokenException();
     }
 }

@@ -1,8 +1,6 @@
 package datasource;
 
-import datasource.datamapper.OwnerDataMapper;
 import datasource.datamapper.PlayListDataMapper;
-import datasource.datamapper.TrackDataMapper;
 import domain.objects.PlayList;
 import org.junit.Before;
 import org.junit.Rule;

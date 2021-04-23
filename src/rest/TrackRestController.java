@@ -29,7 +29,7 @@ public class TrackRestController {
     @Path("tracks")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllTracks(@QueryParam("token") String token, @QueryParam("forPlaylist") int forPlaylist){
-        if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
+        tokenService.validateToken(token);
         final List<Track> trackList = trackService.getAllTracks(forPlaylist);
         final GetTrackListResponse dto = dtoBuilderService.buildGetAllTracksResponseDTO(trackList);
         return Response.status(Response.Status.OK).entity(dto).build();
@@ -39,7 +39,7 @@ public class TrackRestController {
     @Path("playlists/{id}/tracks")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTracksByPlayList(@QueryParam("token") String token, @PathParam("id") int playListID){
-        if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
+        tokenService.validateToken(token);
         List<Track> trackList = trackService.getAllTracksByPlayList(playListID);
         GetTrackListResponse dto = dtoBuilderService.buildGetAllTracksResponseDTO(trackList);
         return Response.status(Response.Status.OK).entity(dto).build();
@@ -52,7 +52,7 @@ public class TrackRestController {
                                             @PathParam("playListID") int playListID,
                                             @PathParam("trackID") int trackID)
     {
-        if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
+        tokenService.validateToken(token);
         trackService.removeTrackFromPlayList(playListID, trackID);
         List<Track> trackList = trackService.getAllTracksByPlayList(playListID);
         GetTrackListResponse dto = dtoBuilderService.buildGetAllTracksResponseDTO(trackList);
@@ -67,7 +67,7 @@ public class TrackRestController {
                                        @PathParam("id") int playListID,
                                        rest.dto.Track track)
     {
-        if(!tokenService.validateToken(token)) { return Response.status(Response.Status.FORBIDDEN).build(); }
+        tokenService.validateToken(token);
         trackService.addTrackToPlayList(playListID, dtoToDomainService.convertTrackDTOToTrack(track));
         trackService.updateOfflineAvailable(dtoToDomainService.convertTrackDTOToTrack(track));
         List<Track> trackList = trackService.getAllTracksByPlayList(playListID);

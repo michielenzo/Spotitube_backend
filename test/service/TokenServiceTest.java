@@ -2,6 +2,7 @@ package service;
 
 import datasource.datamapper.OwnerDataMapper;
 import domain.objects.Owner;
+import exceptions.InvalidTokenException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,10 +30,9 @@ public class TokenServiceTest {
         Assert.assertEquals(10, token.length());
     }
 
-    @Test
+    @Test(expected = InvalidTokenException.class)
     public void test_validateToken_method(){
         Mockito.when(ownerDataMapper.readByToken("1234")).thenReturn(new Owner());
-        boolean validation = tokenService.validateToken("1234");
-        Assert.assertTrue(validation);
+        tokenService.validateToken("123");
     }
 }

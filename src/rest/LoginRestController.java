@@ -1,7 +1,5 @@
 package rest;
 
-import exceptions.InvalidPasswordException;
-import exceptions.InvalidUsernameException;
 import rest.dto.LoginRequest;
 import rest.dto.LoginResponse;
 import service.LoginService;
